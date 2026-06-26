@@ -21,7 +21,6 @@ const FeedbackWidget = {
 
       const result = await submitFeedback(endpoint, {
         apiKey: config.apiKey,
-        repo: config.repo,
         type: formData.type,
         title: formData.title,
         description: formData.description,

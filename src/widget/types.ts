@@ -7,7 +7,6 @@ export interface FeedbackUser {
 
 export interface FeedbackConfig {
   apiKey: string;
-  repo: string;
   user: FeedbackUser;
   endpoint?: string;
 }
@@ -21,7 +20,6 @@ export interface FeedbackMetadata {
 
 export interface FeedbackPayload {
   apiKey: string;
-  repo: string;
   type: FeedbackType;
   title: string;
   description: string;

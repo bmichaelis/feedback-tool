@@ -16,7 +16,6 @@ function makeRequest(body: unknown): Request {
 
 const validPayload = {
   apiKey: 'key_valid',
-  repo: 'org/repo',
   type: 'bug',
   title: 'Test bug',
   description: 'Something broke',
@@ -31,7 +30,7 @@ const validPayload = {
 };
 
 beforeEach(() => {
-  vi.stubEnv('WIDGET_API_KEYS', 'key_valid,key_other');
+  vi.stubEnv('WIDGET_API_KEYS', 'key_valid:org/repo,key_other:org/other');
   mockCreateIssue.mockResolvedValue('https://github.com/org/repo/issues/1');
   mockUploadScreenshot.mockResolvedValue('https://blob.vercel.app/shot.png');
   vi.resetModules();
@@ -65,12 +64,20 @@ describe('POST /api/feedback', () => {
     expect((await res.json()).issueUrl).toBe('https://github.com/org/repo/issues/1');
   });
 
+  it('resolves repo from apiKey server-side and passes it to createIssue', async () => {
+    const { POST } = await import('@/app/api/feedback/route');
+    await POST(makeRequest(validPayload) as any);
+    expect(mockCreateIssue).toHaveBeenCalledWith(
+      expect.objectContaining({ repo: 'org/repo' })
+    );
+  });
+
   it('uploads screenshot and passes URL to createIssue when screenshot provided', async () => {
     const { POST } = await import('@/app/api/feedback/route');
     await POST(makeRequest({ ...validPayload, screenshot: 'data:image/png;base64,abc' }) as any);
     expect(mockUploadScreenshot).toHaveBeenCalledWith('data:image/png;base64,abc');
     expect(mockCreateIssue).toHaveBeenCalledWith(
-      expect.objectContaining({ screenshotUrl: 'https://blob.vercel.app/shot.png' })
+      expect.objectContaining({ repo: 'org/repo', screenshotUrl: 'https://blob.vercel.app/shot.png' })
     );
   });
 

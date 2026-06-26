@@ -5,7 +5,6 @@ import type { FeedbackType, FeedbackUser, FeedbackMetadata } from '@/widget/type
 
 interface FeedbackBody {
   apiKey: string;
-  repo: string;
   type: FeedbackType;
   title: string;
   description: string;
@@ -14,8 +13,14 @@ interface FeedbackBody {
   screenshot: string | null;
 }
 
-function getValidApiKeys(): string[] {
-  return (process.env.WIDGET_API_KEYS ?? '').split(',').filter(Boolean);
+// WIDGET_API_KEYS format: "key1:org/repo1,key2:org/repo2"
+function getKeyRepoMap(): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const entry of (process.env.WIDGET_API_KEYS ?? '').split(',')) {
+    const [key, repo] = entry.split(':');
+    if (key && repo) map.set(key, repo);
+  }
+  return map;
 }
 
 function corsHeaders(): Record<string, string> {
@@ -36,7 +41,6 @@ function isValidBody(body: unknown): body is FeedbackBody {
   if (
     !(
       typeof b.apiKey === 'string' &&
-      typeof b.repo === 'string' &&
       (b.type === 'bug' || b.type === 'feature') &&
       typeof b.title === 'string' &&
       b.title.length > 0 &&
@@ -70,7 +74,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400, headers: corsHeaders() });
   }
 
-  if (!getValidApiKeys().includes(body.apiKey)) {
+  const repo = getKeyRepoMap().get(body.apiKey);
+  if (!repo) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders() });
   }
 
@@ -85,7 +90,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     const issueUrl = await createIssue({
-      repo: body.repo,
+      repo,
       type: body.type,
       title: body.title,
       description: body.description,
