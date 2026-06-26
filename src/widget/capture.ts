@@ -49,6 +49,20 @@ export async function captureScreenshot(): Promise<string | null> {
   try {
     const { clientWidth } = document.documentElement;
     const { scrollHeight } = document.body;
+
+    const main = document.querySelector('main') as HTMLElement | null;
+    const flex1 = main?.parentElement as HTMLElement | null;
+    if (main && flex1) {
+      const cs = (el: HTMLElement) => window.getComputedStyle(el);
+      console.log('[FeedbackWidget] layout debug:', {
+        flex1Width: cs(flex1).width,
+        mainWidth: cs(main).width,
+        mainMarginLeft: cs(main).marginLeft,
+        mainMarginRight: cs(main).marginRight,
+        mainBCR: main.getBoundingClientRect(),
+      });
+    }
+
     return await toJpeg(document.body, {
       quality: 0.8,
       pixelRatio: 1,
