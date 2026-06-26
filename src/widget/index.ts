@@ -35,4 +35,4 @@ const FeedbackWidget = {
   },
 };
 
-(window as Window & { FeedbackWidget: typeof FeedbackWidget }).FeedbackWidget = FeedbackWidget;
+(window as unknown as Window & { FeedbackWidget: typeof FeedbackWidget }).FeedbackWidget = FeedbackWidget;
