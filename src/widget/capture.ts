@@ -47,7 +47,8 @@ export function captureMetadata(): FeedbackMetadata {
 
 export async function captureScreenshot(): Promise<string | null> {
   try {
-    const { clientWidth, scrollHeight } = document.documentElement;
+    const { clientWidth, scrollWidth, scrollHeight } = document.documentElement;
+    console.log('[FeedbackWidget] capture:', { clientWidth, scrollWidth, scrollHeight });
     return await toJpeg(document.documentElement, {
       quality: 0.8,
       pixelRatio: 1,
