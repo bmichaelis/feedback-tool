@@ -48,12 +48,11 @@ export function captureMetadata(): FeedbackMetadata {
 export async function captureScreenshot(): Promise<string | null> {
   try {
     const { clientWidth, scrollHeight } = document.documentElement;
-    return await toJpeg(document.body, {
+    return await toJpeg(document.documentElement, {
       quality: 0.8,
       pixelRatio: 1,
       width: clientWidth,
       height: scrollHeight,
-      style: { width: `${clientWidth}px` },
       filter: (node) =>
         !(node instanceof Element && node.id?.startsWith('fw-')),
     });
