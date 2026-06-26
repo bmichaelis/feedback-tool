@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import type { FeedbackMetadata } from './types';
 
 const bufferedErrors: string[] = [];
@@ -47,8 +47,7 @@ export function captureMetadata(): FeedbackMetadata {
 
 export async function captureScreenshot(): Promise<string | null> {
   try {
-    const canvas = await html2canvas(document.body, { useCORS: true, logging: false });
-    return canvas.toDataURL('image/png');
+    return await toPng(document.body);
   } catch (err) {
     console.error('[FeedbackWidget] screenshot capture failed:', err);
     return null;

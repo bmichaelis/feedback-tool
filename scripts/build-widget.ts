@@ -11,7 +11,7 @@ void (async () => {
     outfile: 'public/widget/feedback-widget.js',
     format: 'iife',
     platform: 'browser',
-    target: ['chrome90', 'firefox90', 'safari14'],
+    target: ['chrome107', 'firefox107', 'safari16'],
     logLevel: 'info',
   });
 })();
