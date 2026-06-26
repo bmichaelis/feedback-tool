@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Feedback Widget Integration Test</title>
+  <style>body { font-family: system-ui, sans-serif; padding: 40px; }</style>
+</head>
+<body>
+  <h1>Feedback Widget Integration Test</h1>
+  <p>Click the button in the bottom-right corner to test the widget.</p>
+  <p>Submissions will create a real GitHub Issue in the configured repo.</p>
+
+  <script src="../public/widget/feedback-widget.js"></script>
+  <script>
+    FeedbackWidget.init({
+      apiKey: 'key_test',
+      repo: 'bmichaelis/feedback-tool',
+      endpoint: 'http://localhost:3000',
+      user: { id: 'test-user', email: 'brett.michaelis@gmail.com' }
+    });
+  </script>
+</body>
+</html>
