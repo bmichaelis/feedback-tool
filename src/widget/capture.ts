@@ -47,7 +47,12 @@ export function captureMetadata(): FeedbackMetadata {
 
 export async function captureScreenshot(): Promise<string | null> {
   try {
-    return await toJpeg(document.body, { quality: 0.8, pixelRatio: 1 });
+    return await toJpeg(document.body, {
+      quality: 0.8,
+      pixelRatio: 1,
+      filter: (node) =>
+        !(node instanceof Element && node.id?.startsWith('fw-')),
+    });
   } catch (err) {
     console.error('[FeedbackWidget] screenshot capture failed:', err);
     return null;
