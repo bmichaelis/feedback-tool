@@ -54,6 +54,9 @@ export async function captureScreenshot(): Promise<string | null> {
       pixelRatio: 1,
       width: clientWidth,
       height: scrollHeight,
+      // overflow-x: hidden on body causes SVG foreignObject to constrain
+      // content width; override to visible so centering works correctly
+      style: { overflowX: 'visible' },
       filter: (node) =>
         !(node instanceof Element && node.id?.startsWith('fw-')),
     });
