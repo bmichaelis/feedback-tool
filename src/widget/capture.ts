@@ -45,9 +45,26 @@ export function captureMetadata(): FeedbackMetadata {
   };
 }
 
+function isCrossOrigin(src: string): boolean {
+  try {
+    return new URL(src, window.location.href).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 export async function captureScreenshot(): Promise<string | null> {
   try {
-    return await toPng(document.body);
+    return await toPng(document.body, {
+      skipFonts: true,
+      filter: (node) => {
+        if (node instanceof HTMLImageElement || node instanceof HTMLVideoElement) {
+          const src = (node as HTMLImageElement).currentSrc || node.src;
+          if (src && isCrossOrigin(src)) return false;
+        }
+        return true;
+      },
+    });
   } catch (err) {
     console.error('[FeedbackWidget] screenshot capture failed:', err);
     return null;
