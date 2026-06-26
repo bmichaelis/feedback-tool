@@ -50,6 +50,8 @@ export async function captureScreenshot(): Promise<string | null> {
     return await toJpeg(document.body, {
       quality: 0.8,
       pixelRatio: 1,
+      width: window.innerWidth,
+      height: window.innerHeight,
       filter: (node) =>
         !(node instanceof Element && node.id?.startsWith('fw-')),
     });
