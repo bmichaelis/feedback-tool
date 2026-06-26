@@ -47,9 +47,10 @@ export function captureMetadata(): FeedbackMetadata {
 
 export async function captureScreenshot(): Promise<string | null> {
   try {
-    const canvas = await html2canvas(document.body);
+    const canvas = await html2canvas(document.body, { useCORS: true, logging: false });
     return canvas.toDataURL('image/png');
-  } catch {
+  } catch (err) {
+    console.error('[FeedbackWidget] screenshot capture failed:', err);
     return null;
   }
 }
