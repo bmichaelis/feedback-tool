@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
 import type { FeedbackMetadata } from './types';
 
 const bufferedErrors: string[] = [];
@@ -47,7 +47,7 @@ export function captureMetadata(): FeedbackMetadata {
 
 export async function captureScreenshot(): Promise<string | null> {
   try {
-    return await toPng(document.body);
+    return await toJpeg(document.body, { quality: 0.8, pixelRatio: 1 });
   } catch (err) {
     console.error('[FeedbackWidget] screenshot capture failed:', err);
     return null;
