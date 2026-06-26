@@ -20,10 +20,10 @@ describe('uploadScreenshot', () => {
 
   it('strips the data URL prefix before uploading', async () => {
     const { uploadScreenshot } = await import('@/lib/storage');
-    await uploadScreenshot('data:image/png;base64,abc123==');
+    await uploadScreenshot('data:image/png;base64,dGVzdA==');
     const [, buffer] = mockPut.mock.calls[0];
     expect(Buffer.isBuffer(buffer)).toBe(true);
-    expect(buffer.toString('base64')).toBe('abc123==');
+    expect(buffer.toString('base64')).toBe('dGVzdA==');
   });
 
   it('uploads with public access and png content type', async () => {
