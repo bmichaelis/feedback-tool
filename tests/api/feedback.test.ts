@@ -101,4 +101,18 @@ describe('POST /api/feedback', () => {
     const res = await POST(makeRequest(validPayload) as any);
     expect(res.status).toBe(500);
   });
+
+  it('OPTIONS returns 204 with CORS headers', async () => {
+    const { OPTIONS } = await import('@/app/api/feedback/route');
+    const res = await OPTIONS();
+    expect(res.status).toBe(204);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('returns 400 when metadata fields are missing', async () => {
+    const { POST } = await import('@/app/api/feedback/route');
+    const badPayload = { ...validPayload, metadata: { url: 'https://x.com' } }; // missing browser/os/consoleErrors
+    const res = await POST(makeRequest(badPayload) as any);
+    expect(res.status).toBe(400);
+  });
 });
