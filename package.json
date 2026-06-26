@@ -1,0 +1,38 @@
+{
+  "name": "feedback-tool",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run build:widget && next dev",
+    "build": "npm run build:widget && next build",
+    "build:widget": "tsx scripts/build-widget.ts",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "@vercel/blob": "^2.5.0",
+    "html2canvas": "^1.4.1",
+    "next": "16.2.9",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.9",
+    "esbuild": "^0.28.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5",
+    "vitest": "^4.1.9"
+  }
+}
