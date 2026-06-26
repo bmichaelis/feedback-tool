@@ -45,38 +45,62 @@ export function captureMetadata(): FeedbackMetadata {
   };
 }
 
+/**
+ * Chrome's getComputedStyle() reports marginLeft as "0px" for block elements centered
+ * via `margin: auto` + `max-width`, even though the browser renders them at the correct
+ * visual position. html-to-image reads getComputedStyle to inline styles on cloned
+ * elements, so it inlines "0px" and the screenshot shows left-aligned content.
+ *
+ * Fix: before capture, read the actual BRC offset from the parent and stamp it as an
+ * explicit inline margin-left. Restore originals after capture.
+ */
+function pinBlockMargins(root: HTMLElement): () => void {
+  const fixes: Array<{ el: HTMLElement; origML: string }> = [];
+  const candidates: Array<{ el: HTMLElement; offset: number }> = [];
+
+  // Batch all reads before writing to avoid layout thrashing
+  root.querySelectorAll<HTMLElement>('*').forEach((el) => {
+    const parent = el.parentElement;
+    if (!parent) return;
+    // Only relevant for block containers — flex/grid position children via their own layout
+    const parentDisplay = window.getComputedStyle(parent).display;
+    if (parentDisplay !== 'block' && parentDisplay !== 'flow-root') return;
+    const cs = window.getComputedStyle(el);
+    if (cs.position === 'absolute' || cs.position === 'fixed') return;
+    if (cs.marginLeft !== '0px') return;
+    const offset = Math.round(
+      el.getBoundingClientRect().left - parent.getBoundingClientRect().left,
+    );
+    if (offset > 0) candidates.push({ el, offset });
+  });
+
+  // Batch all writes
+  candidates.forEach(({ el, offset }) => {
+    fixes.push({ el, origML: el.style.marginLeft });
+    el.style.marginLeft = `${offset}px`;
+  });
+
+  return () => fixes.forEach(({ el, origML }) => { el.style.marginLeft = origML; });
+}
+
 export async function captureScreenshot(): Promise<string | null> {
   try {
     const { clientWidth } = document.documentElement;
     const { scrollHeight } = document.body;
-
-    const main = document.querySelector('main') as HTMLElement | null;
-    const flex1 = main?.parentElement as HTMLElement | null;
-    if (main && flex1) {
-      const cs = (el: HTMLElement) => window.getComputedStyle(el);
-      console.log('[FW]', JSON.stringify({
-        flex1Display: cs(flex1).display,
-        flex1JustifyContent: cs(flex1).justifyContent,
-        flex1AlignItems: cs(flex1).alignItems,
-        flex1BCR: flex1.getBoundingClientRect(),
-        mainOverflowX: cs(main).overflowX,
-        mainMarginLeft: cs(main).marginLeft,
-        mainMarginInlineStart: cs(main).marginInlineStart,
-        mainBCR: main.getBoundingClientRect(),
-      }));
+    const restore = pinBlockMargins(document.body);
+    try {
+      return await toJpeg(document.body, {
+        quality: 0.8,
+        pixelRatio: 1,
+        width: clientWidth,
+        height: scrollHeight,
+        style: { overflowX: 'visible' },
+        filter: (node) =>
+          !(node instanceof Element && node.id?.startsWith('fw-')),
+      });
+    } finally {
+      restore();
     }
-
-    return await toJpeg(document.body, {
-      quality: 0.8,
-      pixelRatio: 1,
-      width: clientWidth,
-      height: scrollHeight,
-      // overflow-x: hidden on body causes SVG foreignObject to constrain
-      // content width; override to visible so centering works correctly
-      style: { overflowX: 'visible' },
-      filter: (node) =>
-        !(node instanceof Element && node.id?.startsWith('fw-')),
-    });
   } catch (err) {
     console.error('[FeedbackWidget] screenshot capture failed:', err);
     return null;
