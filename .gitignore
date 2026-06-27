@@ -45,3 +45,4 @@ public/widget/feedback-widget.js
 
 # Superpowers design docs
 .superpowers/sdd/
+e2e/test-results/
