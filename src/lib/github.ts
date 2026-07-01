@@ -9,10 +9,11 @@ interface CreateIssueParams {
   metadata: FeedbackMetadata;
   user: FeedbackUser;
   screenshotUrl: string | null;
+  userScreenshotUrl: string | null;
 }
 
 function formatBody(params: CreateIssueParams): string {
-  const { description, metadata, user, screenshotUrl } = params;
+  const { description, metadata, user, screenshotUrl, userScreenshotUrl } = params;
 
   const metaTable = [
     '| Field | Value |',
@@ -28,7 +29,10 @@ function formatBody(params: CreateIssueParams): string {
       ? `\n\n**Console errors:**\n\`\`\`\n${metadata.consoleErrors.join('\n')}\n\`\`\``
       : '';
 
-  const screenshotSection = screenshotUrl ? `\n\n![Screenshot](${screenshotUrl})` : '';
+  const screenshots: string[] = [];
+  if (screenshotUrl) screenshots.push(`**Page screenshot:**\n![Page screenshot](${screenshotUrl})`);
+  if (userScreenshotUrl) screenshots.push(`**Attached by user:**\n![User screenshot](${userScreenshotUrl})`);
+  const screenshotSection = screenshots.length > 0 ? `\n\n${screenshots.join('\n\n')}` : '';
 
   return `${description}\n\n${metaTable}${errorsSection}${screenshotSection}`;
 }

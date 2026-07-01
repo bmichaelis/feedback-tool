@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('html2canvas', () => ({
-  default: vi.fn().mockResolvedValue({
-    toDataURL: () => 'data:image/png;base64,fakeshot',
-  }),
+vi.mock('html-to-image', () => ({
+  toJpeg: vi.fn().mockResolvedValue('data:image/jpeg;base64,fakeshot'),
 }));
 
 beforeEach(() => {
@@ -77,12 +75,12 @@ describe('captureScreenshot', () => {
   it('returns a base64 data URL on success', async () => {
     const { captureScreenshot } = await import('@/widget/capture');
     const result = await captureScreenshot();
-    expect(result).toBe('data:image/png;base64,fakeshot');
+    expect(result).toBe('data:image/jpeg;base64,fakeshot');
   });
 
-  it('returns null when html2canvas throws', async () => {
-    vi.doMock('html2canvas', () => ({
-      default: vi.fn().mockRejectedValue(new Error('canvas fail')),
+  it('returns null when toJpeg throws', async () => {
+    vi.doMock('html-to-image', () => ({
+      toJpeg: vi.fn().mockRejectedValue(new Error('canvas fail')),
     }));
     vi.resetModules();
     const { captureScreenshot } = await import('@/widget/capture');

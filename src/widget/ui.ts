@@ -4,6 +4,7 @@ export interface WidgetFormData {
   type: FeedbackType;
   title: string;
   description: string;
+  userScreenshot: string | null;
 }
 
 type SubmitHandler = (data: WidgetFormData) => Promise<string>;
@@ -48,6 +49,14 @@ const STYLES = `
   #fw-success { background: #f0fdf4; color: #166534; }
   #fw-success a { color: #166534; }
   #fw-error { background: #fef2f2; color: #991b1b; }
+  #fw-attachment-label {
+    display: block; font-size: 13px; color: #6b7280;
+    margin-bottom: 4px;
+  }
+  #fw-attachment {
+    width: 100%; font-size: 13px; margin-bottom: 12px;
+    font-family: inherit; cursor: pointer;
+  }
 `;
 
 export function injectWidget(onSubmit: SubmitHandler): void {
@@ -82,6 +91,8 @@ function openModal(onSubmit: SubmitHandler): void {
         </select>
         <input id="fw-title" type="text" placeholder="Title" required aria-label="Title" />
         <textarea id="fw-description" placeholder="Describe the issue or feature..." required aria-label="Description"></textarea>
+        <label id="fw-attachment-label" for="fw-attachment">Attach a screenshot (optional)</label>
+        <input id="fw-attachment" type="file" accept="image/*" aria-label="Attach screenshot" />
         <button type="submit" id="fw-submit">Submit Feedback</button>
       </form>
     </div>
@@ -104,8 +115,18 @@ function openModal(onSubmit: SubmitHandler): void {
     const description = (document.getElementById('fw-description') as HTMLTextAreaElement).value;
     const form = document.getElementById('fw-form')!;
 
+    const attachmentFile = (document.getElementById('fw-attachment') as HTMLInputElement).files?.[0] ?? null;
+    const userScreenshot = attachmentFile
+      ? await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Failed to read attachment'));
+          reader.readAsDataURL(attachmentFile);
+        })
+      : null;
+
     try {
-      const issueUrl = await onSubmit({ type, title, description });
+      const issueUrl = await onSubmit({ type, title, description, userScreenshot });
       form.innerHTML = `
         <div id="fw-success">
           Feedback submitted! <a href="${issueUrl}" target="_blank" rel="noopener">View issue &rarr;</a>

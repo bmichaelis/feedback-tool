@@ -61,6 +61,7 @@ describe('injectWidget', () => {
       type: 'feature',
       title: 'Add dark mode',
       description: 'Would be nice',
+      userScreenshot: null,
     });
   });
 

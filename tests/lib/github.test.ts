@@ -29,6 +29,7 @@ const baseParams = {
   },
   user: { id: 'u1', email: 'test@example.com' },
   screenshotUrl: null,
+  userScreenshotUrl: null,
 };
 
 describe('createIssue', () => {
@@ -96,17 +97,38 @@ describe('createIssue', () => {
     expect(body).not.toContain('Console errors');
   });
 
-  it('embeds screenshot image when screenshotUrl provided', async () => {
+  it('embeds page screenshot with label when screenshotUrl provided', async () => {
     const { createIssue } = await import('@/lib/github');
     await createIssue({ ...baseParams, screenshotUrl: 'https://blob.vercel.app/shot.png' });
     const body = mockCreate.mock.calls[0][0].body as string;
-    expect(body).toContain('![Screenshot](https://blob.vercel.app/shot.png)');
+    expect(body).toContain('**Page screenshot:**');
+    expect(body).toContain('![Page screenshot](https://blob.vercel.app/shot.png)');
   });
 
-  it('omits screenshot section when screenshotUrl is null', async () => {
+  it('embeds user screenshot with label when userScreenshotUrl provided', async () => {
+    const { createIssue } = await import('@/lib/github');
+    await createIssue({ ...baseParams, userScreenshotUrl: 'https://blob.vercel.app/attach.png' });
+    const body = mockCreate.mock.calls[0][0].body as string;
+    expect(body).toContain('**Attached by user:**');
+    expect(body).toContain('![User screenshot](https://blob.vercel.app/attach.png)');
+  });
+
+  it('embeds both screenshots when both provided', async () => {
+    const { createIssue } = await import('@/lib/github');
+    await createIssue({
+      ...baseParams,
+      screenshotUrl: 'https://blob.vercel.app/page.png',
+      userScreenshotUrl: 'https://blob.vercel.app/user.png',
+    });
+    const body = mockCreate.mock.calls[0][0].body as string;
+    expect(body).toContain('**Page screenshot:**');
+    expect(body).toContain('**Attached by user:**');
+  });
+
+  it('omits screenshot section when both are null', async () => {
     const { createIssue } = await import('@/lib/github');
     await createIssue(baseParams);
     const body = mockCreate.mock.calls[0][0].body as string;
-    expect(body).not.toContain('![Screenshot]');
+    expect(body).not.toContain('![');
   });
 });

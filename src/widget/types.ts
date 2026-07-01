@@ -26,4 +26,5 @@ export interface FeedbackPayload {
   user: FeedbackUser;
   metadata: FeedbackMetadata;
   screenshot: string | null;
+  userScreenshot: string | null;
 }

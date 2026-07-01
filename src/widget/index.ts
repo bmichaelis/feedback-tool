@@ -27,6 +27,7 @@ const FeedbackWidget = {
         user: config.user,
         metadata,
         screenshot,
+        userScreenshot: formData.userScreenshot,
       });
 
       return result.issueUrl;

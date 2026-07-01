@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createIssue } from '@/lib/github';
-import { uploadScreenshot } from '@/lib/storage';
+import { uploadScreenshot, uploadAttachment } from '@/lib/storage';
 import type { FeedbackType, FeedbackUser, FeedbackMetadata } from '@/widget/types';
 
 interface FeedbackBody {
@@ -11,6 +11,7 @@ interface FeedbackBody {
   user: FeedbackUser;
   metadata: FeedbackMetadata;
   screenshot: string | null;
+  userScreenshot?: string | null;
 }
 
 // WIDGET_API_KEYS format: "key1:org/repo1,key2:org/repo2"
@@ -88,6 +89,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
   }
 
+  let userScreenshotUrl: string | null = null;
+  if (body.userScreenshot) {
+    try {
+      userScreenshotUrl = await uploadAttachment(body.userScreenshot);
+    } catch (err) {
+      console.error('Attachment upload failed:', err);
+    }
+  }
+
   try {
     const issueUrl = await createIssue({
       repo,
@@ -97,6 +107,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       metadata: body.metadata,
       user: body.user,
       screenshotUrl,
+      userScreenshotUrl,
     });
     return NextResponse.json({ issueUrl }, { headers: corsHeaders() });
   } catch (err) {
